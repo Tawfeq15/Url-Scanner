@@ -1,26 +1,40 @@
 # URL Security Scanner (v3.5.0)
 
-FastAPI-based **passive** web scanner with a “zero false positives” philosophy.  
-Detects technologies, flags missing security headers, surfaces high-certainty SQL/XSS indicators, inspects cookies, and reports SSL/TLS details.
+FastAPI-based **passive** web scanner with a **“zero false positives”** philosophy.  
+It detects technologies, flags missing security headers, highlights high-certainty SQL/XSS indicators, inspects cookies, and reports SSL/TLS details — all **without active attacks**.
+
+> **Why?** Get a clean, reliable security signal you can trust in CI, demos, and quick assessments — no noisy false alarms.
 
 ---
 
-## Quick Start — Start Here
+## ✨ Highlights
+- **Passive & safe**: inspects public responses only (no intrusive probing).
+- **Tech fingerprinting**: frameworks, CMS, servers, and CDNs.
+- **Headers hardening**: groups missing security headers by severity.
+- **High-confidence SQL/XSS hints**: conservative to avoid noise.
+- **Cookie hygiene**: `Secure`, `HttpOnly`, `SameSite`, expiry.
+- **SSL/TLS snapshot**: issuer/subject, protocol, cipher, validity.
+- **Structured logs**: timing & summary per scan for quick triage.
+
+---
+
+## 🚀 Quick Start — Start Here
 
 > The shortest path: **install → run → test**.
 
-1) **Open a terminal in the project folder**
-- Windows: open **PowerShell** in this folder.
-- Linux/macOS: open a shell and `cd` into the folder.
+1. **Open a terminal in the project folder**
+   - **Windows**: open **PowerShell** here.
+   - **Linux/macOS**: open a shell and `cd` into the folder.
 
-2) **Install dependencies**
-```bash
-pip install -r requirements.txt
-# Windows alt:  py -m pip install -r requirements.txt
-# (Optional, recommended) create a venv first:
-#   python -m venv .venv && . .venv/Scripts/Activate.ps1   # Windows
-#   python -m venv .venv && source .venv/bin/activate      # Linux/macOS
-```
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   # Windows alt:  py -m pip install -r requirements.txt
+   # (Optional, recommended) create a virtual env first:
+   #   Windows:  python -m venv .venv && . .venv\Scripts\Activate.ps1
+   #   Linux/macOS: python3 -m venv .venv && source .venv/bin/activate
+   ```
+
 3. **Run the server**
    - **Windows (PowerShell):**
      ```powershell
@@ -30,27 +44,20 @@ pip install -r requirements.txt
      ```bash
      python3 main.py
      ```
-   - **Alternative (recommended for development):**
+   - **Alternative (recommended for development — auto-reload):**
      ```bash
      uvicorn main:app --host 0.0.0.0 --port 5005 --reload
      ```
 
 4. **Open the API docs (Swagger UI)**
-   - http://127.0.0.1:5005/docs  
-     From there, click **POST /scan** → **Try it out** → أدخل الـ URL ثم **Execute**.
+   - افتح: **http://127.0.0.1:5005/docs**
+   - من هناك اختر **POST /scan** → اضغط **Try it out** → أدخِل رابط الموقع (URL) → ثم **Execute**.
 
 5. **Quick test with Postman**
-   1. Method: **POST**  
-      URL: `http://localhost:5005/scan`
-   2. **Headers:** `Content-Type: application/json`
-   3. **Body** → **raw** → **JSON:**
-      ```json
-      { "url": "https://github.com" }
-      ```
-   4. اضغط **Send** وشاهد تقرير الـ JSON في الأسفل.
-
-6. **Quick test with cURL (optional)**
-   ```bash
-   curl -X POST http://127.0.0.1:5005/scan \
-     -H "Content-Type: application/json" \
-     -d '{"url":"https://example.com"}'
+   i. **Method:** `POST`  
+   **URL:** `http://localhost:5005/scan`  
+   ii. **Headers:**  
+   `Content-Type: application/json`  
+   iii. **Body** → **raw** → **JSON**:
+   ```json
+   { "url": "https://github.com" }
