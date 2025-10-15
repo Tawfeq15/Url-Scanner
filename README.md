@@ -53,11 +53,26 @@ It detects technologies, flags missing security headers, highlights high-certain
    - افتح: **http://127.0.0.1:5005/docs**
    - من هناك اختر **POST /scan** → اضغط **Try it out** → أدخِل رابط الموقع (URL) → ثم **Execute**.
 
-5. **Quick test with Postman**
-   i. **Method:** `POST`  
-   **URL:** `http://localhost:5005/scan`  
-   ii. **Headers:**  
-   `Content-Type: application/json`  
-   iii. **Body** → **raw** → **JSON**:
-   ```json
-   { "url": "https://github.com" }
+5. **Quick test with Postman (GUI)**
+   1) افتح **Postman** → اضغط **New** → اختر **HTTP Request**.  
+   2) في الخانة العلوية للصندوق، ضع هذا العنوان:
+      ```
+      http://localhost:5005/scan
+      ```
+      (إذا غيّرت المنفذ، عدّل `5005` حسب تشغيلك.)
+   3) غيّر الطريقة إلى **POST**.  
+   4) انتقل إلى **Body** → اختر **raw** → من القائمة اليمنى اختر **JSON**.  
+   5) ألصق هذا الجسم (JSON):
+      ```json
+      { "url": "https://github.com" }
+      ```
+      > ملاحظة: عند اختيار **JSON**، Postman يضيف الهيدر
+      `Content-Type: application/json` تلقائيًا. وإن لم يفعل، أضِفه يدويًا من **Headers**.
+   6) اضغط **Send** → تظهر نتيجة **200 OK** مع تقرير JSON في الأسفل.
+
+6. **Quick test with cURL (optional)**
+   ```bash
+   curl -X POST http://127.0.0.1:5005/scan \
+     -H "Content-Type: application/json" \
+     -d '{"url":"https://example.com"}'
+
