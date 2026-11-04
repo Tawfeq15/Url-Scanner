@@ -49,8 +49,8 @@
   <div class="authbox">
     <span class="branddemo">🛵 وَصلة برو — حسابات الكباتن</span>
     <h1>أهلًا بك في نظام التوصيل</h1>
-    <p>اختَر حساب الكابتن أو الأدمن لتجربة إدارة الطلبات والمحاسبة ورسائل واتساب.</p>
-    <div class="inputrow"><button class="btn soft" type="button" onclick="ui.fillAccount('captain')">🛵 تجربة حساب الكابتن</button><button class="btn plain" type="button" onclick="ui.fillAccount('admin')">🛡️ تجربة حساب الأدمن</button></div>
+    <p>اضغط على زر الحساب للدخول مباشرة، أو أدخل بياناتك واضغط «دخول إلى النظام».</p>
+    <div class="inputrow"><button class="btn soft" type="button" onclick="ui.fillAccount('captain')">🛵 دخول الكابتن مباشرة</button><button class="btn plain" type="button" onclick="ui.fillAccount('admin')">🛡️ دخول الأدمن مباشرة</button></div>
     <form onsubmit="ui.signIn();return false" autocomplete="off">
       <label for="loginUsername">رقم هاتف الكابتن أو بريد الأدمن</label><input id="loginUsername" required placeholder="0790001001" autocomplete="username" />
       <label for="loginPassword">كلمة المرور</label><input id="loginPassword" type="password" required placeholder="كلمة المرور" autocomplete="current-password" />
@@ -62,7 +62,7 @@
 </div>
 <script>
 (()=>{'use strict';
-const KEY='wasla_video_updated_v3', NOW=()=>new Date().toISOString();
+const KEY='wasla_accounts_login_fixed_v5', NOW=()=>new Date().toISOString();
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const jd=v=>((Number(v)||0)/1000).toFixed(3)+' د.أ';
 const arDate=d=>new Date(d).toLocaleString('ar-JO',{dateStyle:'short',timeStyle:'short'});
@@ -76,7 +76,7 @@ function seed(){let t=NOW();return {version:3,company:'c1',viewer:'u1',page:'cha
  chat:[{id:'m1',companyId:'c1',orderId:501,sender:'u3',text:'توصيل من الحصن إلى إربد — أجرة 4 دنانير',type:'post',at:t},{id:'m2',companyId:'c1',orderId:501,sender:'u4',text:'أنا بستلم 🛵',type:'claim',at:t},{id:'m3',companyId:'c1',orderId:501,text:'✅ خالد أكّد ليث بـ «تم». احتُسبت العمولة على الطرفين.',type:'system',at:t},{id:'m4',companyId:'c1',orderId:502,sender:'u1',text:'من الصويفية إلى عبدون — أجرة 5 دنانير. مين فاضي؟',type:'post',at:t},{id:'m5',companyId:'c1',orderId:502,sender:'u2',text:'أنا بستلم 🙋',type:'claim',at:t},{id:'m6',companyId:'c1',orderId:503,sender:'u3',text:'من المفرق إلى إربد — مين قريب؟',type:'post',at:t},{id:'m7',companyId:'c1',orderId:504,sender:'u4',text:'من دوار المدينة إلى الجامعة — أجرة 3.5 دنانير',type:'post',at:t},{id:'m8',companyId:'c2',orderId:505,sender:'u5',text:'من وسط البلد إلى المحطة — أجرة 3 دنانير',type:'post',at:t}]};}
 let s;try{s=JSON.parse(localStorage.getItem(KEY)||'null');if(s?.version!==3||!Array.isArray(s.ledger))s=seed()}catch(e){s=seed()}
 let sessionAuth=null;
-try{sessionAuth=JSON.parse(sessionStorage.getItem('wasla_demo_session_v4')||'null')}catch(e){sessionAuth=null}
+try{sessionAuth=JSON.parse(sessionStorage.getItem('wasla_demo_session_fixed_v5')||'null')}catch(e){sessionAuth=null}
 if(!sessionAuth||!['admin','captain'].includes(sessionAuth.role))sessionAuth=null;
 if(sessionAuth){s.viewer=sessionAuth.uid;s.company=sessionAuth.companyId||'c1';if(sessionAuth.role==='admin')s.viewer='admin'}
 if(!Array.isArray(s.demoAccounts))s.demoAccounts=[];
@@ -147,15 +147,15 @@ function send(){let raw=$('messageInput')?.value.trim()||'';if(!raw)return;const
 function csvDownload(rows,filename){let csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),2500)}
 function exportCSV(kind){let r=[];if(kind==='orders')r=[['رقم','المالك','المستلم','الأجرة','الحالة'],...orders().map(o=>[o.id,name(o.owner),name(o.receiver),o.fare/1000,statusName(o.status)])];if(kind==='balances'||kind==='weekly')r=[['الكابتن','مدين','دائن','الرصيد'],...activeUsers().filter(u=>isAdmin()||u.id===s.viewer).map(u=>{let e=ledgers().filter(x=>x.userId===u.id&&(kind!=='weekly'||new Date(x.at)>=new Date(dueDate().getTime()-7*864e5)&&new Date(x.at)<dueDate()));return [u.name,e.filter(x=>x.kind==='debit').reduce((a,x)=>a+x.amount,0)/1000,e.filter(x=>x.kind==='credit').reduce((a,x)=>a+x.amount,0)/1000,(kind==='weekly'?e.reduce((a,x)=>a+(x.kind==='debit'?x.amount:-x.amount),0):balance(u.id))/1000]})];if(kind==='payments')r=[['رقم','الكابتن','القيمة','الحالة','المرجع'],...relevantPayments().map(p=>[p.id,name(p.uid),p.amount/1000,statusName(p.status),p.reference])];if(kind==='history')r=isAdmin()?[['التاريخ','الإجراء'],...s.events.filter(x=>x.companyId===s.company).map(e=>[arDate(e.at),e.text])]:[['التاريخ','الإجراء'],...ledgers().filter(x=>x.userId===s.viewer).map(e=>[arDate(e.at),e.description])];csvDownload(r,`wasla_${kind}_${new Date().toISOString().slice(0,10)}.csv`)}
 function reset(){if(!isAdmin()||!window.confirm('إعادة جميع بيانات العرض التجريبية؟ سيتم حذف إدخالات هذه النسخة من المتصفح.'))return;s=seed();commit('إعادة بيانات العرض')}
-function fillAccount(role){$('loginUsername').value=role==='admin'?'admin@demo.local':'0790001001';$('loginPassword').value=role==='admin'?'Admin@12345':'Captain@12345';$('loginError').textContent=''}
+function fillAccount(role){$('loginUsername').value=role==='admin'?'admin@demo.local':'0790001001';$('loginPassword').value=role==='admin'?'Admin@12345':'Captain@12345';$('loginError').textContent='';signIn()}
 function signIn(){let login=$('loginUsername').value.trim().toLowerCase(),pass=$('loginPassword').value;
  let acc=login==='admin@demo.local'&&pass==='Admin@12345'?{role:'admin',uid:'admin',companyId:'c1'}:null;
  if(!acc){let built={u1:{login:'0790001001',password:'Captain@12345',companyId:'c1'},u2:{login:'0790001002',password:'Captain@12345',companyId:'c1'}};
   let hit=Object.entries(built).find(([id,v])=>v.login===login&&v.password===pass);if(hit)acc={role:'captain',uid:hit[0],companyId:hit[1].companyId};}
  if(!acc){let custom=s.demoAccounts.find(x=>x.login.toLowerCase()===login&&x.password===pass);if(custom)acc={role:'captain',uid:custom.uid,companyId:custom.companyId};}
  if(!acc||acc.role==='captain'&&(!user(acc.uid)||user(acc.uid).disabled)){$('loginError').textContent='اسم الدخول أو كلمة المرور غير صحيحة، أو الحساب موقوف';return;}
- sessionAuth=acc;sessionStorage.setItem('wasla_demo_session_v4',JSON.stringify(acc));s.company=acc.companyId;s.viewer=acc.uid;s.page=acc.role==='admin'?'waInbox':'chat';$('authCover').classList.add('hidden');persist();render();}
-function logout(){sessionAuth=null;sessionStorage.removeItem('wasla_demo_session_v4');s.viewer='u1';s.company='c1';s.page='chat';$('authCover').classList.remove('hidden');$('loginPassword').value='';$('loginError').textContent='';render()}
+ sessionAuth=acc;try{sessionStorage.setItem('wasla_demo_session_fixed_v5',JSON.stringify(acc))}catch(e){}s.company=acc.companyId;s.viewer=acc.uid;s.page=acc.role==='admin'?'waInbox':'chat';$('authCover').classList.add('hidden');try{persist();render()}catch(e){$('loginError').textContent='تعذّر تحميل بيانات الحساب. جرّب إعادة ضبط بيانات العرض.';console.error('Wasla render error:',e);$('authCover').classList.remove('hidden');sessionAuth=null;}}
+function logout(){sessionAuth=null;try{sessionStorage.removeItem('wasla_demo_session_fixed_v5')}catch(e){}s.viewer='u1';s.company='c1';s.page='chat';$('authCover').classList.remove('hidden');$('loginPassword').value='';$('loginError').textContent='';render()}
 function waInbox(){return s.waInbox.filter(m=>m.companyId===s.company).slice().reverse()}
 function waType(t){if(/^(أنا|انا|استلام|بستلم)/i.test(t))return 'claim';if(/^(تم|تأكيد|تاكيد)/i.test(t))return 'confirmation';return 'request'}
 function waNewMessage(){if(!isAdmin())return;modal('محاكاة رسالة واردة من واتساب أعمال',`<div class="fields"><div class="field wide"><label>مرسل الرسالة (رقم كابتن مسجل)</label><select id="waFrom">${activeUsers().map(u=>`<option value="${u.id}">${esc(u.name)} • ${esc(u.phone)}</option>`).join('')}</select></div><div class="field wide"><label>نص الرسالة</label><textarea id="waText" placeholder="مثال: تم #502 أو أنا بستلم الطلب #502"></textarea></div></div><p class="tiny muted">هذه محاكاة داخل المتصفح؛ لا يتم سحب أي رسالة من واتساب الحقيقي.</p>`,'إضافة للوارد',()=>{let uid=$('waFrom').value,t=$('waText').value.trim();if(t.length<3)return notify('اكتب نص الرسالة');waSimulate(uid,t);closeModal()})}
